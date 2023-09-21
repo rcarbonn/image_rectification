@@ -1,5 +1,6 @@
 import numpy as np
 import cv2
+from utils import split_annotations
 
 def proj_line(pt1, pt2):
     l = np.cross(pt1, pt2)
@@ -40,3 +41,11 @@ def perspective_shift(img, H):
     t = [-xmin, -ymin]
     Ht = np.array([[1, 0, t[0]], [0, 1, t[1]], [0, 0, 1]])
     return Ht
+
+def gen_metrics(Hline, annots, annot_id):
+    annots_,_ = split_annotations(annots)
+    angle_ids = [[4,5],[6,7]]
+    for ids in angle_ids:
+        la1,la2,_ = gen_lines_and_intersection(annots_[ids[0]], annots_[ids[1]])
+        angle_before, angle_after = angle_change(la1, la2, Hline)
+        print((angle_before, angle_after))

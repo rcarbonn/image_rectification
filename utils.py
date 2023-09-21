@@ -17,7 +17,6 @@ def warp_image(img, H):
     [xmax, ymax] = (pts.max(axis=0).ravel() + 0.5).astype(int)
     t = [-xmin, -ymin]
     Ht = np.array([[1, 0, t[0]], [0, 1, t[1]], [0, 0, 1]])
-    print(Ht)
 
     result = cv2.warpPerspective(img, Ht.dot(H), (xmax-xmin, ymax-ymin))
     return result
@@ -26,6 +25,13 @@ def warp_image(img, H):
 def cosine(u, v):
     return (u[0] * v[0] + u[1] * v[1]) / (np.sqrt(u[0]**2 + u[1]**2) * np.sqrt(v[0]**2 + v[1]**2))
 
+
+def split_annotations(annots):
+    n_annots,_ = annots.shape
+    annots_ = np.hstack((annots, np.ones([n_annots,1], annots.dtype)))
+    annots_ = np.split(annots_, n_annots//2, axis=0)
+    annots = np.split(annots, n_annots//2, axis=0)
+    return annots_, annots
 
 def annotate(impath):
     im = Image.open(impath)
@@ -62,3 +68,15 @@ def plot_annotations(img, annots, plot_type='lines'):
     elif plot_type=='scatter':
         plt.scatter(annots[:,0], annots[:,1], c=colors)
     plt.show()
+
+
+def composite_image(H, src_img, dst_img):
+
+    composite_img = dst_img.copy()
+    warped_img = cv2.warpPerspective(src_img, H, (dst_img.shape[1], dst_img.shape[0]))
+    mask = np.sum(warped_img,axis=-1) > 0
+    composite_img[mask] = warped_img[mask]
+    plt.imshow(composite_img)
+    plt.show()
+
+

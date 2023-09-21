@@ -29,10 +29,4 @@ def affine_rectification(parallel_annots):
     H = Ha@Hp
     Hline = np.linalg.inv(H).T
 
-    # find angles between remaining lines
-    for ids in angle_ids:
-        la1,la2,_ = gen_lines_and_intersection(parallel_annots_[ids[0]], parallel_annots_[ids[1]])
-        angle_before, angle_after = angle_change(la1, la2, Hline)
-        # print((angle_before, angle_after))
-
-    return H
+    return H, Hline
