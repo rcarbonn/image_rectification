@@ -5,8 +5,11 @@ import argparse as ap
 import os
 
 from affine_rectification import affine_rectification
+from metric_rectification import metric_rectification
+from perspective import rectify_annots
 from utils import warp_image
-import  matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
+
 
 
 DATA_CONFIG = {
@@ -14,15 +17,16 @@ DATA_CONFIG = {
         'annotation' : './data/annotation',
         'q1' : {
             'images' : './data/q1',
-            'annotation' : './data/annotation/q1_annotation.npy',
+            'annotation1' : './data/annotation/q1_annotation.npy',
             },
         'q2' : {
             'images' : './data/q1',
-            'annotation' : './data/annotation/q2_annotation.npy',
+            'annotation1' : './data/annotation/q1_annotation.npy',
+            'annotation2' : './data/annotation/q2_annotation.npy',
             },
         'q3' : {
             'images' : './data/q3',
-            'annotation' : './data/annotation/q3_annotation.npy',
+            'annotation1' : './data/annotation/q3_annotation.npy',
             }
         }
 
@@ -43,16 +47,24 @@ def main(args):
             print("Invalid filename!")
             return
 
-    annotations = np.load(config['annotation'], allow_pickle=True)
+    annotations1 = np.load(config['annotation1'], allow_pickle=True)
     for image_id, image_file in image_files.items():
         image = Image.open(os.path.join(images_dir, image_file))
         img = np.array(image)
-        annots = annotations.item().get(image_id)
+        annots1 = annotations1.item().get(image_id)
         # plot_annotations(img, annots, plot_type=args.viz)
-        H = affine_rectification(annots)
-        res = warp_image(img, H)
-        # plt.imshow(res)
-        # plt.show()
+        Haffine, rectified_annots = affine_rectification(annots1)
+        res = warp_image(img, Haffine)
+        if args.question == 'q2':
+            annotations2 = np.load(config['annotation2'], allow_pickle=True)
+            annots2 = annotations2.item().get(image_id)
+            perp_annots = rectify_annots(annots2.reshape(-1,1,2), Haffine).squeeze(1)
+            Hmetric = metric_rectification(perp_annots)
+            res2 = warp_image(res, Hmetric)
+            # plot_annotations(res, perp_annots, plot_type=args.viz)
+        # plot_annotations(res, rectified_annots, plot_type=args.viz)
+        plt.imshow(res2)
+        plt.show()
 
 
 if __name__ == '__main__':
