@@ -33,9 +33,6 @@ def affine_rectification(parallel_annots):
     for ids in angle_ids:
         la1,la2,_ = gen_lines_and_intersection(parallel_annots_[ids[0]], parallel_annots_[ids[1]])
         angle_before, angle_after = angle_change(la1, la2, Hline)
-        print((angle_before, angle_after))
+        # print((angle_before, angle_after))
 
-    # rectified_annots = rectify_annots(parallel_annots[n_annots//2:].reshape(-1,1,2), H).squeeze(1)
-    rectified_annots = rectify_annots(parallel_annots.reshape(-1,1,2), H).squeeze(1)
-
-    return H, rectified_annots
+    return H

@@ -25,6 +25,18 @@ def angle_change(l1, l2, Hline):
     angle_after = np.dot(l1_, l2_) / (np.linalg.norm(l1_) * np.linalg.norm(l2_))
     return angle_before, angle_after
 
-def rectify_annots(annots, H):
-    rectified_annots = cv2.perspectiveTransform(annots, H)
-    return rectified_annots
+def rectify_annots(img, annots, H):
+    Ht = perspective_shift(img, H)
+    annots = annots.reshape(-1,1,2)
+    rectified_annots = cv2.perspectiveTransform(annots, Ht@H)
+    return rectified_annots.squeeze(1)
+
+def perspective_shift(img, H):
+    h, w = img.shape[:2]
+    pts = np.array([[0, 0], [0, h], [w, h], [w, 0]], dtype=np.float64).reshape(-1, 1, 2)
+    pts = cv2.perspectiveTransform(pts, H)
+    [xmin, ymin] = (pts.min(axis=0).ravel() - 0.5).astype(int)
+    [xmax, ymax] = (pts.max(axis=0).ravel() + 0.5).astype(int)
+    t = [-xmin, -ymin]
+    Ht = np.array([[1, 0, t[0]], [0, 1, t[1]], [0, 0, 1]])
+    return Ht

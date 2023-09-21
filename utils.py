@@ -17,6 +17,7 @@ def warp_image(img, H):
     [xmax, ymax] = (pts.max(axis=0).ravel() + 0.5).astype(int)
     t = [-xmin, -ymin]
     Ht = np.array([[1, 0, t[0]], [0, 1, t[1]], [0, 0, 1]])
+    print(Ht)
 
     result = cv2.warpPerspective(img, Ht.dot(H), (xmax-xmin, ymax-ymin))
     return result
@@ -61,4 +62,3 @@ def plot_annotations(img, annots, plot_type='lines'):
     elif plot_type=='scatter':
         plt.scatter(annots[:,0], annots[:,1], c=colors)
     plt.show()
-

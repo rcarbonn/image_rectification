@@ -53,18 +53,21 @@ def main(args):
         img = np.array(image)
         annots1 = annotations1.item().get(image_id)
         # plot_annotations(img, annots, plot_type=args.viz)
-        Haffine, rectified_annots = affine_rectification(annots1)
+        Haffine = affine_rectification(annots1)
+        parallel_rectified_annots = rectify_annots(img, annots1, Haffine)
         res = warp_image(img, Haffine)
         if args.question == 'q2':
             annotations2 = np.load(config['annotation2'], allow_pickle=True)
             annots2 = annotations2.item().get(image_id)
-            perp_annots = rectify_annots(annots2.reshape(-1,1,2), Haffine).squeeze(1)
+            perp_annots = rectify_annots(res, annots2, Haffine)
             Hmetric = metric_rectification(perp_annots)
+            perp_rectified_annots = rectify_annots(res, perp_annots, Hmetric)
             res2 = warp_image(res, Hmetric)
-            # plot_annotations(res, perp_annots, plot_type=args.viz)
+            plot_annotations(res, perp_annots, plot_type=args.viz)
+            plot_annotations(res2, perp_rectified_annots, plot_type=args.viz)
         # plot_annotations(res, rectified_annots, plot_type=args.viz)
-        plt.imshow(res2)
-        plt.show()
+        # plt.imshow(res2)
+        # plt.show()
 
 
 if __name__ == '__main__':
