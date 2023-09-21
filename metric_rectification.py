@@ -4,7 +4,6 @@ from perspective import rectify_annots
 from affine_rectification import affine_rectification
 
 
-
 def metric_rectification(perp_annots):
 
     n_annots,_ = perp_annots.shape
@@ -13,7 +12,6 @@ def metric_rectification(perp_annots):
     perp_annots_ = np.hstack((perp_annots, np.ones([n_annots,1], perp_annots.dtype)))
     perp_annots_ = np.split(perp_annots_, n_annots//2, axis=0)
 
-    # line_ids = [[0,1], [2,3], [4,5]]
     line_ids = [[0,1], [2,3]]
     angle_ids = [[4,5], [6,7]]
 

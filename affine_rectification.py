@@ -2,8 +2,6 @@ import numpy as np
 from perspective import gen_lines_and_intersection, proj_line, angle_change
 from perspective import rectify_annots
 
-
-
 def affine_rectification(parallel_annots):
 
     n_annots,_ = parallel_annots.shape

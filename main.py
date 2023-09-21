@@ -3,7 +3,6 @@ from PIL import Image
 from utils import plot_annotations
 import argparse as ap
 import os
-import cv2
 
 from affine_rectification import affine_rectification
 from metric_rectification import metric_rectification
