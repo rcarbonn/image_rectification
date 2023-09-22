@@ -53,6 +53,15 @@ def annotate(impath):
     return clicks
 
 
+def add_lines(ax, line_annots):
+    n,_ = line_annots.shape
+    ldata = np.split(line_annots.T, n//2, axis=1)
+    colors = np.repeat(np.random.uniform(0, 1, (n//2,1,3)), 2, axis=0)
+    for i,l in enumerate(ldata):
+        line = l2d(l[0], l[1], color=colors[i], linewidth=5.0)
+        ax.add_line(line)
+
+
 def plot_annotations(img, annots, plot_type='lines'):
     fig = plt.figure()
     ax = fig.add_subplot(111)
@@ -60,10 +69,7 @@ def plot_annotations(img, annots, plot_type='lines'):
     n,_ = annots.shape
     colors = np.repeat(np.random.uniform(0, 1, (n//2,1,3)), 2, axis=0)
     if plot_type=='lines':
-        ldata = np.split(annots.T, n//2, axis=1)
-        for i,l in enumerate(ldata):
-            line = l2d(l[0], l[1], color=colors[i], linewidth=5.0)
-            ax.add_line(line)
+        add_lines(ax, annots)
 
     elif plot_type=='scatter':
         plt.scatter(annots[:,0], annots[:,1], c=colors)
@@ -78,5 +84,43 @@ def composite_image(H, src_img, dst_img):
     composite_img[mask] = warped_img[mask]
     plt.imshow(composite_img)
     plt.show()
+
+
+def gen_fig():
+    return plt.figure()
+
+def gen_plots(fig,idx, org_img, lines1, rect_img, rect_lines, rect_img2, eval_lines, rect_eval_lines):
+    idx = (idx)*6
+    print(idx)
+    count=1
+
+    ax = fig.add_subplot(6,6,idx+count)
+    ax.imshow(org_img)
+    count+=1
+
+    ax = fig.add_subplot(6,6,idx+count)
+    ax.imshow(org_img)
+    add_lines(ax, lines1)
+    count+=1
+
+    ax = fig.add_subplot(6,6,idx+count)
+    ax.imshow(rect_img)
+    add_lines(ax, rect_lines)
+    count+=1
+
+    ax = fig.add_subplot(6,6,idx+count)
+    ax.imshow(rect_img2)
+    count+=1
+
+    ax = fig.add_subplot(6,6,idx+count)
+    ax.imshow(org_img)
+    add_lines(ax, eval_lines)
+    count+=1
+
+    ax = fig.add_subplot(6,6,idx+count)
+    ax.imshow(rect_img2)
+    add_lines(ax, rect_eval_lines)
+
+    return fig
 
 

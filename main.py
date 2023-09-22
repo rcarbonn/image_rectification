@@ -8,7 +8,7 @@ from affine_rectification import affine_rectification
 from metric_rectification import metric_rectification
 from homography import get_homography
 from perspective import rectify_annots, gen_metrics
-from utils import warp_image, composite_image
+from utils import warp_image, composite_image, gen_plots, gen_fig
 import matplotlib.pyplot as plt
 
 
@@ -50,6 +50,8 @@ def main(args):
 
     annotations1 = np.load(config['annotation1'], allow_pickle=True)
     if args.question == 'q1' or args.question == 'q2':
+        count = 0
+        fig = gen_fig()
         for image_id, image_file in image_files.items():
             image = Image.open(os.path.join(images_dir, image_file))
             img = np.array(image)
@@ -67,27 +69,33 @@ def main(args):
                 res2 = warp_image(res, Hmetric)
                 gen_metrics(Hm_line@Ha_line, annots2, 'test')
             # plot_annotations(res, perp_annots, plot_type=args.viz)
-            # plot_annotations(res2, perp_rectified_annots, plot_type=args.viz)
+                # plot_annotations(res2, perp_rectified_annots, plot_type=args.viz)
+                fig = gen_plots(fig, count, img, annots2[:8], res, perp_annots[:8], res2, annots2[8:], perp_rectified_annots[8:])
+            count+=1
         # plot_annotations(res, rectified_annots, plot_type=args.viz)
         # plt.imshow(res2)
-        # plt.show()
+        plt.show()
     elif args.question == 'q3':
+        src_files = []
+        dst_files = []
+        dst_ids = []
         for image_id, image_file in image_files.items():
             if 'normal' in image_id:
-                src_file = image_file
-                src_id = image_id
+                src_files.append(image_file)
             elif 'perspective' in image_id:
-                dst_file = image_file
-                dst_id = image_id
-        src_image = Image.open(os.path.join(images_dir, src_file))
-        dst_image = Image.open(os.path.join(images_dir, dst_file))
-        src_img = np.array(src_image)
-        dst_img = np.array(dst_image)
-        h,w,c = src_img.shape
-        src_pts = np.array([[0,0],[w,0],[w,h],[0,h]])
-        dst_pts = annotations1.item().get(dst_id)
-        H = get_homography(src_pts, dst_pts)
-        composite_image(H, src_img, dst_img)
+                dst_files.append(image_file)
+                dst_ids.append(image_id)
+        Hlist = []
+        for src_file in src_files:
+            src_image = Image.open(os.path.join(images_dir, src_file))
+            dst_image = Image.open(os.path.join(images_dir, dst_files[0]))
+            src_img = np.array(src_image)
+            dst_img = np.array(dst_image)
+            h,w,c = src_img.shape
+            src_pts = np.array([[0,0],[w,0],[w,h],[0,h]])
+            dst_pts = annotations1.item().get(dst_ids[0])
+            H = get_homography(src_pts, dst_pts)
+            composite_image(H, src_img, dst_img)
 
 
 
