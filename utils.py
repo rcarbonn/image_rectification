@@ -87,12 +87,88 @@ def composite_image(H, src_img, dst_img):
     return composite_img
 
 
-def gen_fig():
-    return plt.figure()
+def gen_fig(figsize=None):
+    return plt.figure(figsize=figsize)
 
-def gen_plots(fig,idx, org_img, lines1, rect_img, rect_lines, rect_img2, eval_lines, rect_eval_lines):
+def gen_plots_q1(fig, idx, org_img, lines1, rect_img):
+    idx = (idx)*3
+    count=1
+    nrows = 5
+
+    ax1 = fig.add_subplot(nrows,3,idx+count)
+    ax1.imshow(org_img)
+    count+=1
+
+    ax2 = fig.add_subplot(nrows,3,idx+count)
+    ax2.imshow(org_img)
+    add_lines(ax2, lines1)
+    count+=1
+
+    ax3 = fig.add_subplot(nrows,3,idx+count)
+    ax3.imshow(rect_img)
+
+    if idx==0:
+        ax1.set_title("Original Image")
+        ax2.set_title("Annotated Lines")
+        ax3.set_title("Affine-rectified Image")
+
+
+    return fig
+
+def gen_plots_q2(fig, idx, org_img, lines1, rect_img, rect_lines, rect_img2):
+    idx = (idx)*4
+    count=1
+    nrows = 5
+
+    ax1 = fig.add_subplot(nrows,4,idx+count)
+    ax1.imshow(org_img)
+    count+=1
+
+    ax2 = fig.add_subplot(nrows,4,idx+count)
+    ax2.imshow(org_img)
+    add_lines(ax2, lines1)
+    count+=1
+
+    ax3 = fig.add_subplot(nrows,4,idx+count)
+    ax3.imshow(rect_img)
+    add_lines(ax3, rect_lines)
+    count+=1
+
+    ax4 = fig.add_subplot(nrows,4,idx+count)
+    ax4.imshow(rect_img2)
+
+    if idx==0:
+        ax1.set_title("Original Image")
+        ax2.set_title("Annotated perpendicular lines")
+        ax3.set_title("Annotated perp lines on affine-rectified image")
+        ax4.set_title("Metric-rectified Image")
+
+    return fig
+
+
+def gen_eval_lines_plots(fig, idx, org_img, lines1, rect_img, rect_lines, eval_data = {}):
+    idx = (idx)*2
+    count=1
+    nrows = 5
+
+    ax1 = fig.add_subplot(nrows,2,idx+count)
+    ax1.imshow(org_img)
+    add_lines(ax1, lines1)
+    print(eval_data)
+    ax1.set_xlabel("Cos theta before {:3f}, {:3f}".format(eval_data['prev'][0], eval_data['prev'][1]))
+    count+=1
+
+    ax2 = fig.add_subplot(nrows,2,idx+count)
+    ax2.imshow(rect_img)
+    add_lines(ax2, rect_lines)
+    ax2.set_xlabel("Cos theta after {:3f}, {:3f}".format(eval_data['after'][0], eval_data['after'][1]))
+    count+=1
+
+    return fig
+
+
+def gen_plots_q3(fig,idx, org_img, lines1, rect_img, rect_lines, rect_img2, eval_lines, rect_eval_lines):
     idx = (idx)*6
-    print(idx)
     count=1
 
     ax = fig.add_subplot(6,6,idx+count)

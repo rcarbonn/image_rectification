@@ -8,7 +8,7 @@ from affine_rectification import affine_rectification
 from metric_rectification import metric_rectification
 from homography import get_homography
 from perspective import rectify_annots, gen_metrics
-from utils import warp_image, composite_image, gen_plots, gen_fig
+from utils import warp_image, composite_image, gen_plots_q1, gen_plots_q2, gen_eval_lines_plots, gen_fig
 import matplotlib.pyplot as plt
 
 
@@ -36,6 +36,8 @@ DATA_CONFIG = {
         }
 
 
+SUBMISSION_LIST = ['book1', 'checker1', 'chess1', 'tiles2', 'tiles4']
+
 def main(args):
     config = DATA_CONFIG[args.question]
 
@@ -55,7 +57,10 @@ def main(args):
     annotations1 = np.load(config['annotation1'], allow_pickle=True)
     if args.question == 'q1' or args.question == 'q2':
         count = 0
-        fig = gen_fig()
+        fig1 = gen_fig()
+        fig_eval = gen_fig(figsize=(5,10))
+        if args.question=='q2':
+            fig2 = gen_fig()
         for image_id, image_file in image_files.items():
             print(image_id)
             image = Image.open(os.path.join(images_dir, image_file))
@@ -63,10 +68,13 @@ def main(args):
             annots1 = annotations1.item().get(image_id)
             Haffine, Ha_line = affine_rectification(annots1)
             parallel_rectified_annots = rectify_annots(img, annots1, Haffine)
-            print(parallel_rectified_annots)
-            gen_metrics(Ha_line, annots1, 'test')
+            eval_affine = gen_metrics(Ha_line, annots1, image_id)
             res = warp_image(img, Haffine)
-            plot_annotations(res, parallel_rectified_annots[8:], plot_type=args.viz)
+            if args.question == 'q1' and image_id in SUBMISSION_LIST:
+                fig1 = gen_plots_q1(fig1, count, img, annots1[:8], res)
+                fig_eval = gen_eval_lines_plots(fig_eval, count, img, annots1[8:], res, parallel_rectified_annots[8:], eval_affine)
+                count+=1
+            # plot_annotations(res, parallel_rectified_annots[8:], plot_type=args.viz)
             if args.question == 'q2':
                 annotations2 = np.load(config['annotation2'], allow_pickle=True)
                 annots2 = annotations2.item().get(image_id)
@@ -74,13 +82,19 @@ def main(args):
                 Hmetric, Hm_line = metric_rectification(perp_annots)
                 perp_rectified_annots = rectify_annots(res, perp_annots, Hmetric)
                 res2 = warp_image(img, Hmetric@Haffine)
-                gen_metrics(Hm_line@Ha_line, annots2, 'test')
-                plot_annotations(res, perp_annots[8:], plot_type=args.viz)
-                plot_annotations(res2, perp_rectified_annots[8:], plot_type=args.viz)
-                # fig = gen_plots(fig, count, img, annots2[:8], res, perp_annots[:8], res2, annots2[8:], perp_rectified_annots[8:])
-            count+=1
+                eval_metric = gen_metrics(Hm_line@Ha_line, annots2, image_id)
+                # plot_annotations(res, perp_annots[8:], plot_type=args.viz)
+                # plot_annotations(res2, perp_rectified_annots[8:], plot_type=args.viz)
+                if image_id in SUBMISSION_LIST:
+                    fig2 = gen_plots_q2(fig2, count, img, annots2[:8], res, perp_annots[:8], res2)
+                    fig_eval = gen_eval_lines_plots(fig_eval, count, img, annots2[8:], res2, perp_rectified_annots[8:], eval_metric)
+                    count+=1
         # plot_annotations(res, rectified_annots, plot_type=args.viz)
-        # plt.imshow(res2)
+        n = plt.get_fignums()
+        for i in n:
+            plt.figure(i)
+            plt.setp(plt.figure(i).get_axes(), xticks=[], yticks=[])
+            plt.savefig("test%d.png"%i, bbox_inches="tight")
         plt.show()
     elif args.question == 'q3' or args.question == 'q5':
         src_files = []

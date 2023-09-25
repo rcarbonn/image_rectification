@@ -50,9 +50,17 @@ def perspective_shift(img, H):
 
 def gen_metrics(Hline, annots, annot_id):
     annots_,_ = split_annotations(annots)
+    eval_data = {}
     angle_ids = [[4,5],[6,7]]
-    angle_ids = [[0,1], [2,3], [4,5],[6,7]]
+    # angle_ids = [[0,1], [2,3], [4,5],[6,7]]
+    angles_before = []
+    angles_after = []
     for ids in angle_ids:
         la1,la2,_ = gen_lines_and_intersection(annots_[ids[0]], annots_[ids[1]])
         angle_before, angle_after = angle_change(la1, la2, Hline)
         print((angle_before, angle_after))
+        angles_before.append(angle_before)
+        angles_after.append(angle_after)
+    eval_data['prev'] = angles_before
+    eval_data['after'] = angles_after
+    return eval_data

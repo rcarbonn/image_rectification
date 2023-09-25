@@ -19,7 +19,6 @@ def affine_rectification(parallel_annots):
         p_infs.append(p)
 
     l_inf = proj_line(p_infs[0], p_infs[1])
-    print(l_inf)
     data_type = l_inf.dtype
 
     Ha = np.eye(3, dtype=data_type)
