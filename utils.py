@@ -84,6 +84,7 @@ def composite_image(H, src_img, dst_img):
     composite_img[mask] = warped_img[mask]
     plt.imshow(composite_img)
     plt.show()
+    return composite_img
 
 
 def gen_fig():

@@ -13,9 +13,10 @@ def metric_rectification(perp_annots):
     perp_annots_ = np.split(perp_annots_, n_annots//2, axis=0)
 
     line_ids = [[0,1], [2,3]]
+    # line_ids = [[4,5], [6,7]]
     angle_ids = [[4,5], [6,7]]
 
-    A = np.zeros((2,3))
+    A = np.zeros((4,3))
     for i,ids in enumerate(line_ids):
         l,m,p = gen_lines_and_intersection(perp_annots_[ids[0]], perp_annots_[ids[1]])
         A[i] = [l[0]*m[0], l[0]*m[1]+l[1]*m[0], l[1]*m[1]]
@@ -28,6 +29,10 @@ def metric_rectification(perp_annots):
     C[0][1] = b/2
     C[1][0] = b/2
     u,d,ut = np.linalg.svd(C)
+    for i,ids in enumerate(line_ids):
+        l,m,p = gen_lines_and_intersection(perp_annots_[ids[0]], perp_annots_[ids[1]])
+        angs = l.reshape(1,-1) @ C @ m.reshape(-1,1)
+        print(angs)
     H = np.eye(3)
     H[0][0] = 1/np.sqrt(d[0])
     H[1][1] = 1/np.sqrt(d[1])

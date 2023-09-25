@@ -18,18 +18,24 @@ def gen_lines_and_intersection(pts1, pts2):
     return l1,l2,p
 
 def angle_change(l1, l2, Hline):
-    l1_ = (Hline @ l1.reshape(-1,1)).flatten()[:2]
-    l2_ = (Hline @ l2.reshape(-1,1)).flatten()[:2]
+    l1_ = (Hline @ l1.reshape(-1,1)).flatten()
+    l2_ = (Hline @ l2.reshape(-1,1)).flatten()
     l1 = l1[:2]
     l2 = l2[:2]
+    l1_ = (l1_/l1_[-1])[:2]
+    l2_ = (l2_/l2_[-1])[:2]
     angle_before = np.dot(l1, l2) / (np.linalg.norm(l1) * np.linalg.norm(l2))
     angle_after = np.dot(l1_, l2_) / (np.linalg.norm(l1_) * np.linalg.norm(l2_))
     return angle_before, angle_after
 
 def rectify_annots(img, annots, H):
     Ht = perspective_shift(img, H)
+    annotsh = np.hstack((annots, np.ones(annots.shape[0]).reshape(-1,1)))
     annots = annots.reshape(-1,1,2)
     rectified_annots = cv2.perspectiveTransform(annots, Ht@H)
+    ra = (H@annotsh.T).T
+    ra = ra/ra[:,None,-1]
+    # print(ra[:,:2])
     return rectified_annots.squeeze(1)
 
 def perspective_shift(img, H):
@@ -45,6 +51,7 @@ def perspective_shift(img, H):
 def gen_metrics(Hline, annots, annot_id):
     annots_,_ = split_annotations(annots)
     angle_ids = [[4,5],[6,7]]
+    angle_ids = [[0,1], [2,3], [4,5],[6,7]]
     for ids in angle_ids:
         la1,la2,_ = gen_lines_and_intersection(annots_[ids[0]], annots_[ids[1]])
         angle_before, angle_after = angle_change(la1, la2, Hline)
