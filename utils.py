@@ -53,13 +53,16 @@ def annotate(impath):
     return clicks
 
 
-def add_lines(ax, line_annots):
+def add_lines(ax, line_annots, ptype='lines'):
     n,_ = line_annots.shape
     ldata = np.split(line_annots.T, n//2, axis=1)
     colors = np.repeat(np.random.uniform(0, 1, (n//2,1,3)), 2, axis=0)
-    for i,l in enumerate(ldata):
-        line = l2d(l[0], l[1], color=colors[i], linewidth=5.0)
-        ax.add_line(line)
+    if ptype=='lines':
+        for i,l in enumerate(ldata):
+            line = l2d(l[0], l[1], color=colors[i], linewidth=1.0)
+            ax.add_line(line)
+    elif ptype=='scatter':
+        ax.scatter(line_annots[:,0], line_annots[:,1])
 
 
 def plot_annotations(img, annots, plot_type='lines'):
@@ -82,8 +85,8 @@ def composite_image(H, src_img, dst_img):
     warped_img = cv2.warpPerspective(src_img, H, (dst_img.shape[1], dst_img.shape[0]))
     mask = np.sum(warped_img,axis=-1) > 0
     composite_img[mask] = warped_img[mask]
-    plt.imshow(composite_img)
-    plt.show()
+    # plt.imshow(composite_img)
+    # plt.show()
     return composite_img
 
 
@@ -140,7 +143,7 @@ def gen_plots_q2(fig, idx, org_img, lines1, rect_img, rect_lines, rect_img2):
     if idx==0:
         ax1.set_title("Original Image")
         ax2.set_title("Annotated perpendicular lines")
-        ax3.set_title("Annotated perp lines on affine-rectified image")
+        ax3.set_title("Annotated perp lines\n on affine-rectified image")
         ax4.set_title("Metric-rectified Image")
 
     return fig
@@ -154,49 +157,47 @@ def gen_eval_lines_plots(fig, idx, org_img, lines1, rect_img, rect_lines, eval_d
     ax1 = fig.add_subplot(nrows,2,idx+count)
     ax1.imshow(org_img)
     add_lines(ax1, lines1)
-    print(eval_data)
-    ax1.set_xlabel("Cos theta before {:3f}, {:3f}".format(eval_data['prev'][0], eval_data['prev'][1]))
+    ax1.set_xlabel("Cos theta before: \n {:3f}, {:3f}".format(eval_data['prev'][0], eval_data['prev'][1]))
     count+=1
 
     ax2 = fig.add_subplot(nrows,2,idx+count)
     ax2.imshow(rect_img)
     add_lines(ax2, rect_lines)
-    ax2.set_xlabel("Cos theta after {:3f}, {:3f}".format(eval_data['after'][0], eval_data['after'][1]))
+    ax2.set_xlabel("Cos theta after: \n {:3f}, {:3f}".format(eval_data['after'][0], eval_data['after'][1]))
     count+=1
+
+    if idx==0:
+        ax1.set_title("Original Image")
+        ax2.set_title("Rectified Image")
 
     return fig
 
 
-def gen_plots_q3(fig,idx, org_img, lines1, rect_img, rect_lines, rect_img2, eval_lines, rect_eval_lines):
-    idx = (idx)*6
+def gen_plots_q3(fig, norm_img, persp_img, annots, warped_img):
+    idx=0
     count=1
 
-    ax = fig.add_subplot(6,6,idx+count)
-    ax.imshow(org_img)
+    ax1 = fig.add_subplot(1,4,idx+count)
+    ax1.imshow(norm_img)
     count+=1
 
-    ax = fig.add_subplot(6,6,idx+count)
-    ax.imshow(org_img)
-    add_lines(ax, lines1)
+    ax2 = fig.add_subplot(1,4,idx+count)
+    ax2.imshow(persp_img)
     count+=1
 
-    ax = fig.add_subplot(6,6,idx+count)
-    ax.imshow(rect_img)
-    add_lines(ax, rect_lines)
+    ax3 = fig.add_subplot(1,4,idx+count)
+    ax3.imshow(persp_img)
+    add_lines(ax3, annots, ptype='scatter')
     count+=1
 
-    ax = fig.add_subplot(6,6,idx+count)
-    ax.imshow(rect_img2)
-    count+=1
+    ax4 = fig.add_subplot(1,4,idx+count)
+    ax4.imshow(warped_img)
 
-    ax = fig.add_subplot(6,6,idx+count)
-    ax.imshow(org_img)
-    add_lines(ax, eval_lines)
-    count+=1
-
-    ax = fig.add_subplot(6,6,idx+count)
-    ax.imshow(rect_img2)
-    add_lines(ax, rect_eval_lines)
+    if idx==0:
+        ax1.set_title("Normal")
+        ax2.set_title("Perspective")
+        ax3.set_title("Annotations")
+        ax4.set_title("Composite")
 
     return fig
 

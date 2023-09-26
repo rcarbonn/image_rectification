@@ -23,6 +23,7 @@ def metric_rectification(perp_annots):
 
     _,_,s = np.linalg.svd(A)
     a,b,c = s[2]
+    print(s[2])
     C = np.zeros((3,3))
     C[0][0] = a
     C[1][1] = c
@@ -32,7 +33,6 @@ def metric_rectification(perp_annots):
     for i,ids in enumerate(line_ids):
         l,m,p = gen_lines_and_intersection(perp_annots_[ids[0]], perp_annots_[ids[1]])
         angs = l.reshape(1,-1) @ C @ m.reshape(-1,1)
-        print(angs)
     H = np.eye(3)
     H[0][0] = 1/np.sqrt(d[0])
     H[1][1] = 1/np.sqrt(d[1])
