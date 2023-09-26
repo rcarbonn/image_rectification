@@ -53,10 +53,13 @@ def annotate(impath):
     return clicks
 
 
-def add_lines(ax, line_annots, ptype='lines'):
+def add_lines(ax, line_annots, ptype='lines', cols='random'):
     n,_ = line_annots.shape
     ldata = np.split(line_annots.T, n//2, axis=1)
-    colors = np.repeat(np.random.uniform(0, 1, (n//2,1,3)), 2, axis=0)
+    if cols=='random':
+        colors = np.repeat(np.random.uniform(0, 1, (n//2,1,3)), 2, axis=0)
+    else:
+        colors=cols
     if ptype=='lines':
         for i,l in enumerate(ldata):
             line = l2d(l[0], l[1], color=colors[i], linewidth=1.0)
@@ -154,15 +157,17 @@ def gen_eval_lines_plots(fig, idx, org_img, lines1, rect_img, rect_lines, eval_d
     count=1
     nrows = 5
 
+    n,_ = lines1.shape
+    colors = np.repeat(np.random.uniform(0, 1, (n//2,1,3)), 2, axis=0)
     ax1 = fig.add_subplot(nrows,2,idx+count)
     ax1.imshow(org_img)
-    add_lines(ax1, lines1)
+    add_lines(ax1, lines1, cols=colors)
     ax1.set_xlabel("Cos theta before: \n {:3f}, {:3f}".format(eval_data['prev'][0], eval_data['prev'][1]))
     count+=1
 
     ax2 = fig.add_subplot(nrows,2,idx+count)
     ax2.imshow(rect_img)
-    add_lines(ax2, rect_lines)
+    add_lines(ax2, rect_lines, cols=colors)
     ax2.set_xlabel("Cos theta after: \n {:3f}, {:3f}".format(eval_data['after'][0], eval_data['after'][1]))
     count+=1
 

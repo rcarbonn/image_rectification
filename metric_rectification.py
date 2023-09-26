@@ -19,11 +19,10 @@ def metric_rectification(perp_annots):
     A = np.zeros((4,3))
     for i,ids in enumerate(line_ids):
         l,m,p = gen_lines_and_intersection(perp_annots_[ids[0]], perp_annots_[ids[1]])
-        A[i] = [l[0]*m[0], l[0]*m[1]+l[1]*m[0], l[1]*m[1]]
+        A[i] = [l[0]*m[0], (l[0]*m[1]+l[1]*m[0])/2, l[1]*m[1]]
 
     _,_,s = np.linalg.svd(A)
     a,b,c = s[2]
-    print(s[2])
     C = np.zeros((3,3))
     C[0][0] = a
     C[1][1] = c
